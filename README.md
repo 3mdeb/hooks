@@ -6,6 +6,18 @@ The goal of this repository is to provide a common place for (pre-commit) hooks
 used to verify the quality of deliverables (such as docuemntation) produced by
 3mdeb.
 
+## Usage
+
+* You need to clone this repository to obtain a local copy of tools and
+  configuration files. You can then use these tools against any other
+  repository/file you need.
+
+```bash
+git clone https://github.com/3mdeb/hooks.git
+```
+
+* Refer to the section below for description of the individual tools.
+
 ## Current state
 
 At present, this repository does not meet the above goal (yet) ;)
