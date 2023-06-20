@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-ROOT_DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+ROOT_DIR=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
+CONFIG_DIR="$HOME/.config/3mdeb-hooks"
 
 errorExit() {
     errorMessage="$1"
@@ -16,7 +17,7 @@ errorCheck() {
 
 usage() {
 cat <<EOF
-Usage: ./$(basename ${0}) <command> <file>
+Usage: ./$(basename "${0}") <command> <file>
 This script verifies the markdown file against our guidelines.
   Commands:
     check     run the linter
@@ -29,16 +30,16 @@ MARKDOWNLINT_CONTAINER="ghcr.io/igorshubovych/markdownlint-cli:v0.32.2"
 
 check() {
   docker run \
-    -v $PWD/.markdownlint.yaml:/workdir/.markdownlint.yaml:ro \
-    -v "$FULL_PATH":/workdir/$FILE_NAME:ro \
+    -v "$CONFIG_DIR"/.markdownlint.yaml:/workdir/.markdownlint.yaml:ro \
+    -v "$FULL_PATH":/workdir/"$FILE_NAME":ro \
     "$MARKDOWNLINT_CONTAINER" \
     -c .markdownlint.yaml "$FILE_NAME"
 }
 
 fix() {
   docker run \
-    -v $PWD/.markdownlint.yaml:/workdir/.markdownlint.yaml:ro \
-    -v "$FULL_PATH":/workdir/$FILE_NAME:rw \
+    -v "$CONFIG_DIR"/.markdownlint.yaml:/workdir/.markdownlint.yaml:ro \
+    -v "$FULL_PATH":/workdir/"$FILE_NAME":rw \
     "$MARKDOWNLINT_CONTAINER" \
     -c .markdownlint.yaml --fix "$FILE_NAME"
 }
@@ -56,8 +57,8 @@ if [ -z "$FILE" ]; then
   usage
 fi
 
-FULL_PATH="$(readlink -f $FILE)"
-FILE_NAME="$(basename $FULL_PATH)"
+FULL_PATH="$(readlink -f "$FILE")"
+FILE_NAME="$(basename "$FULL_PATH")"
 
 
 case "$CMD" in
