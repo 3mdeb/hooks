@@ -57,3 +57,7 @@ description.
 ```bash
 ./markdown.sh fix README.md
 ```
+
+### Yocto
+
+TBD yocto linter https://github.com/priv-kweihmann/oelint-adv
