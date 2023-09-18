@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # Display help message if no or incorrect arguments are given
     if len(sys.argv) < 3:
         print("Usage: python3 script.py <repo_path> <categories>")
-        print("Categories: markdown, bash, python, yaml, robotframework")
+        print("Categories: markdown, bash, python, robotframework")
         sys.exit(1)
 
     # Expecting the repo path as the first argument and a space-separated list of categories as the second
