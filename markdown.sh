@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-ROOT_DIR=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
 CONFIG_DIR="$HOME/.config/3mdeb-hooks"
 
 errorExit() {
@@ -48,7 +47,7 @@ CMD="$1"
 FILE="$2"
 
 if [ -z "$CMD" ]; then
-  echo "commmand not given"
+  echo "command not given"
   usage
 fi
 
