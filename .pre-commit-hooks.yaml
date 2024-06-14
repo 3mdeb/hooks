@@ -1,0 +1,5 @@
+- id: namespell
+  name: Name spellchecker
+  description: TBD
+  entry: namespell.sh
+  language: script

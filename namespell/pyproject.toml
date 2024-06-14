@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "namespell"
+authors = [{name = "3mdeb"}]
+description = "Check trademarked name spelling"
+version = "1.0.0"
+
+[project.scripts]
+namespell = "namespell.__main__:main"
