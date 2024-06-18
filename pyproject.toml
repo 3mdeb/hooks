@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "3mdeb-hooks"
+authors = [{name = "3mdeb"}]
+description = "3mdeb pre-commit hooks"
+version = "1.0.0"
+
+[project.scripts]
+namespell = "hooks.namespell:main"
