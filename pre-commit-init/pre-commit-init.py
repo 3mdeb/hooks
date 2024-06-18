@@ -7,6 +7,9 @@ from shutil import copy2
 
 from jinja2 import Environment, FileSystemLoader
 
+# Define the valid categories
+valid_categories = {"markdown", "bash", "python", "robotframework", "yocto"}
+
 
 def main(repo_path, categories):
     # Navigate to the repository path
@@ -19,9 +22,6 @@ def main(repo_path, categories):
         )
         if not should_continue.lower().startswith("y"):
             sys.exit(1)
-
-    # Define the valid categories
-    valid_categories = {"markdown", "bash", "python", "robotframework"}
 
     # Validate the input categories
     for category in categories:
@@ -47,6 +47,8 @@ def main(repo_path, categories):
     copy2(os.path.join(script_dir, ".codespellx"), repo_path)
     if "markdown" in categories:
         copy2(os.path.join(script_dir, ".markdownlint.yaml"), repo_path)
+    if "yocto" in categories:
+        copy2(os.path.join(script_dir, ".oelint-ruleset.json"), repo_path)
 
     # Run pre-commit commands
     subprocess.run(["pre-commit", "validate-config"])
@@ -58,7 +60,7 @@ if __name__ == "__main__":
     # Display help message if no or incorrect arguments are given
     if len(sys.argv) < 3:
         print("Usage: python3 script.py <repo_path> <categories>")
-        print("Categories: markdown, bash, python, robotframework")
+        print(f"Categories: {valid_categories}")
         sys.exit(1)
 
     # Expecting the repo path as the first argument and a space-separated list of categories as the second

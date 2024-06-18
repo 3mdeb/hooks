@@ -39,6 +39,12 @@ repos:
       - id: yamllint
         args: [-c=.yamllint]
 
+  - repo: https://github.com/3mdeb/pre-commit-hook-branding
+    rev: 57bba1549352401e8a1c3617384a22458973fa7b
+    hooks:
+      - id: namespell
+        args: [--fix]
+
 {% if 'markdown' in categories %}
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.36.0
@@ -78,4 +84,18 @@ repos:
     rev: 4.1.1
     hooks:
       - id: robocop
+{% endif %}
+{% if 'yocto' in categories %}
+  - repo: https://github.com/zarhus/oelint-adv
+    rev: 949111ff4d256af759aa5d94db9d0fb444679b2c
+    hooks:
+      - id: oelint-adv
+        args: [--rulefile=.oelint-ruleset.json, --hide=info, --quiet, --fix]
+        name: Advanced oelint
+        description: Based on the OpenEmbedded Styleguide and work done by oe-stylize-tool this module offers a (nearly) complete linter for bitbake-recipes.
+        entry: oelint-adv
+        language: python
+        language_version: python3
+        files: .*\.(bb)|(bbappend)|(bbclass)$
+
 {% endif %}
