@@ -6,7 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "3mdeb-hooks"
 authors = [{name = "3mdeb"}]
 description = "3mdeb pre-commit hooks"
-version = "1.0.0"
+license = "MIT"
+version = "0.1.0"
 
 [project.scripts]
 namespell = "hooks.namespell:main"

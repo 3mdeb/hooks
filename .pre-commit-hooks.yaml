@@ -1,10 +1,5 @@
 - id: namespell
   name: Name spellchecker
-  description: Check name spelling (case sensitive)
+  description: Check name spelling (case-sensitive)
   entry: namespell
-  language: python
-- id: somehook
-  name: hook
-  description: ...
-  entry: somehook
   language: python
