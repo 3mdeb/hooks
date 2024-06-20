@@ -10,6 +10,7 @@ NAME_RULES = {
     "coreboot": "coreboot",
     "Yocto": "Yocto",
     "NVIDIA": "NVIDIA",
+    "UEFI": "UEFI",
 }
 
 COMMENT_STRINGS = {
@@ -66,7 +67,7 @@ def __get_active_rules(
                 removed = active_rules.pop(rule, None)
                 if removed is None:
                     print(
-                        f"Warning: {filename}:{line_number}: {rule} rule does not exist. Available rules: {NAME_RULES.keys()}"
+                        f"Warning: {filename}:{line_number}: {rule} rule does not exist. Available rules: {list(NAME_RULES.keys())}"
                     )
 
     return active_rules, are_file_rules
