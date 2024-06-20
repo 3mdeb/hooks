@@ -57,3 +57,50 @@ description.
 ```bash
 ./markdown.sh fix README.md
 ```
+
+### namespell
+
+`namespell` searches files for proper nouns, where the capitalization (or lack
+thereof) of letters is important (e.g. `Zarhus` or `coreboot`) and checks if
+they are spelled correctly. When the `-f/--fix` flag is passed, the tool
+automatically fixes incorrectly spelled words.
+
+There are several ways to ignore unwanted checks:
+
+* To exclude entire files/directories from being checked specify an
+[exclude](https://pre-commit.com/#config-exclude) section in
+`.pre-commit-config.yaml`.
+
+* Inline ignores are also supported
+
+Inline ignore statements are comments in a file that tell `namespell` to ignore
+specific rules/lines. They have the following structure:
+
+```bash
+<comment start> namespell:disable <rule1, rule2>
+```
+
+If no rules are specified, all of them will be ignored.
+
+You can use inline ignores to disable checks for an entire file or specific
+lines. If the statement is placed in the first line of the file, it will apply
+to the whole file. If it's placed at the end of a specific line, it will only
+apply to that line. The example below illustrates this.
+
+```bash
+# namespell:disable Zarhus
+
+zarhus dasharo
+zarhus dasharo Coreboot # namespell:disable Dasharo
+dasharo Coreboot
+```
+
+```bash
+somefile:3: 'dasharo' should be 'Dasharo'
+somefile:4: 'Coreboot' should be 'coreboot'
+somefile:5: 'dasharo' should be 'Dasharo'
+somefile:5: 'Coreboot' should be 'coreboot'
+```
+
+As you can see, the spelling of `Zarhus` is ignored throughout the whole file
+and the spelling of `Dasharo` is only ignored in line 4.
