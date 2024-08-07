@@ -19,7 +19,9 @@ repos:
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        exclude: ^.*\.patch$
       - id: mixed-line-ending
+        exclude: ^.*\.patch$
 
   - repo: https://github.com/talos-systems/conform
     rev: v0.1.0-alpha.27
