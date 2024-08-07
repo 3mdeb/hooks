@@ -89,7 +89,7 @@ repos:
 {% endif %}
 {% if 'yocto' in categories %}
   - repo: https://github.com/zarhus/oelint-adv
-    rev:  5.5.2-zarhus
+    rev: 5.5.2-zarhus
     hooks:
       - id: oelint-adv
         args: [--rulefile=.oelint-ruleset.json, --hide=info, --quiet, --fix]
