@@ -88,8 +88,8 @@ repos:
       - id: robocop
 {% endif %}
 {% if 'yocto' in categories %}
-  - repo: https://github.com/zarhus/oelint-adv
-    rev: 5.5.2-zarhus
+  - repo: https://github.com/priv-kweihmann/oelint-adv
+    rev: 5.7.2
     hooks:
       - id: oelint-adv
         args: [--rulefile=.oelint-ruleset.json, --hide=info, --quiet, --fix]
