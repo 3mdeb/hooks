@@ -28,8 +28,7 @@ COMMENT_STRINGS = {
 IGNORE_STRING = "namespell:disable"
 
 
-def __get_comment_string(file) -> str:
-    _, extension = os.path.splitext(f"./{file.name}")
+def __get_comment_string(extension) -> str:
     return (
         COMMENT_STRINGS[extension]
         if extension in COMMENT_STRINGS.keys()
@@ -76,7 +75,8 @@ def __get_active_rules(
 def check_and_fix_file(filename, autofix=False):
     with open(filename, "r", encoding="utf8", errors="ignore") as file:
         lines = file.readlines()
-        comment_string = __get_comment_string(file)
+        _, extension = os.path.splitext(f"./{file.name}")
+        comment_string = __get_comment_string(extension)
 
     # Don't check empty files
     if len(lines) == 0:
@@ -94,8 +94,21 @@ def check_and_fix_file(filename, autofix=False):
     # Whole file ignored
     if file_rules == {}:
         return True
+    inside_codeblock = False
     for line_number, line in enumerate(lines, start=1):
         fixed_line = line
+
+        # Ignore text inside code blocks in Markdown
+        if extension == ".md":
+            if not inside_codeblock and line.lstrip().startswith("```"):
+                inside_codeblock = True
+            elif inside_codeblock and line.lstrip().startswith("```"):
+                inside_codeblock = False
+
+            if inside_codeblock:
+                fixed_lines.append(fixed_line)
+                continue
+
         active_rules = file_rules
         if line_number != 1:
             line_rules, _ = __get_active_rules(
