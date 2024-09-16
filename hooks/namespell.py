@@ -42,6 +42,7 @@ IGNORE_BLOCKS = {
 # start strings. This is necesary for nested blocks (e.g code block inside
 # comment)
 blocks = deque()
+current_start_token = ""
 
 def __get_comment_string(extension) -> str:
     return (
@@ -59,23 +60,41 @@ def __get_ignore_blocks(extension) -> List[IgnoreBlock]:
     )
 
 
+def __log_verbose(message, verbose):
+    if verbose:
+        print(message)
+
+
 # Check if the line starts/ends a block to be ignored and modify the blocks
 # stack accordingly
-def __check_block(ignore_blocks, line):
+def __check_block(ignore_blocks, line, verbose=False):
+    global current_start_token
     for ignore_block in ignore_blocks:
         start_index = line.find(ignore_block.start)
         end_index = line.find(ignore_block.end)
-        if start_index:
-            blocks.append(ignore_block.start)
+        if start_index != -1:
+            # For identical start and end tokens: If the last start token was
+            # the same as this one, then this one is an end token
+            if ignore_block.start == ignore_block.end \
+                and current_start_token == ignore_block.start:
+                start_index = -1
+            else:
+                __log_verbose(f"BLOCK START: {ignore_block.start}, INDEX: {start_index}", verbose)
+                blocks.append(ignore_block.start)
+                current_start_token = ignore_block.start
         # Check if block end matches the latest block start token
         # If true, remove it from the stack
-        if end_index and end_index != start_index:
-            try:
-                last_start_token = blocks.pop()
-            except IndexError:
-                return
-            if last_start_token != ignore_block.start:
-                blocks.append(last_start_token)
+        if end_index != -1 and end_index != start_index:
+            __log_verbose(f"BLOCK END: {ignore_block.end}, INDEX: {end_index}", verbose)
+            if current_start_token == ignore_block.start:
+                current_start_token = ""
+                try:
+                    blocks.pop()
+                    if blocks:
+                        # Get element from the top without popping it
+                        current_start_token = blocks[-1]
+                except IndexError:
+                    return
 
 
 def __get_active_rules(
@@ -114,13 +133,14 @@ def __get_active_rules(
     return active_rules, are_file_rules
 
 
-def check_and_fix_file(filename, autofix=False):
+def check_and_fix_file(filename, autofix=False, verbose=False):
     with open(filename, "r", encoding="utf8", errors="ignore") as file:
         lines = file.readlines()
         _, extension = os.path.splitext(f"./{file.name}")
         comment_string = __get_comment_string(extension)
         ignore_blocks = __get_ignore_blocks(extension)
-
+        __log_verbose(f"FILE: {filename}", verbose)
+    
     # Don't check empty files
     if len(lines) == 0:
         return True
@@ -138,8 +158,9 @@ def check_and_fix_file(filename, autofix=False):
     if file_rules == {}:
         return True
     for line_number, line in enumerate(lines, start=1):
+        __log_verbose(f"LINE {line_number}", verbose)
         fixed_line = line
-        __check_block(ignore_blocks, line)
+        __check_block(ignore_blocks, line, verbose)
         if blocks:
             fixed_lines.append(fixed_line)
             continue
@@ -194,6 +215,12 @@ def parse_args() -> argparse.Namespace:
         help="Automatically fix issues",
     )
     parser.add_argument("files", nargs="+", help="File(s) to parse")
+    parser.add_argument(
+            "--verbose",
+            action="store_true",
+            default=False,
+            help="Run tool in verbose mode"
+    )
     return parser.parse_args()
 
 
@@ -201,7 +228,7 @@ def main():
     args = parse_args()
     all_passed = True
     for filename in args.files:
-        if not check_and_fix_file(filename, args.fix):
+        if not check_and_fix_file(filename, args.fix, args.verbose):
             all_passed = False
     if not all_passed:
         sys.exit(1)
