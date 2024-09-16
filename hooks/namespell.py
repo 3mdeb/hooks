@@ -3,6 +3,8 @@ import os
 import re
 import sys
 from importlib import metadata
+from typing import NamedTuple, List
+from collections import deque
 
 NAME_RULES = {
     "Zarhus": "Zarhus",
@@ -27,6 +29,19 @@ COMMENT_STRINGS = {
 
 IGNORE_STRING = "namespell:disable"
 
+class IgnoreBlock(NamedTuple):
+    start: str
+    end: str
+
+IGNORE_BLOCKS = {
+".md": [IgnoreBlock("```", "```"), IgnoreBlock("<!--", "-->")],
+"default": []
+}
+
+# Stack that keeps track of "active" blocks to be ignored by storing their
+# start strings. This is necesary for nested blocks (e.g code block inside
+# comment)
+blocks = deque()
 
 def __get_comment_string(extension) -> str:
     return (
@@ -34,6 +49,33 @@ def __get_comment_string(extension) -> str:
         if extension in COMMENT_STRINGS.keys()
         else COMMENT_STRINGS["default"]
     )
+
+
+def __get_ignore_blocks(extension) -> List[IgnoreBlock]:
+    return (
+            IGNORE_BLOCKS[extension]
+            if extension in IGNORE_BLOCKS.keys()
+            else IGNORE_BLOCKS["default"]
+    )
+
+
+# Check if the line starts/ends a block to be ignored and modify the blocks
+# stack accordingly
+def __check_block(ignore_blocks, line):
+    for ignore_block in ignore_blocks:
+        start_index = line.find(ignore_block.start)
+        end_index = line.find(ignore_block.end)
+        if start_index:
+            blocks.append(ignore_block.start)
+        # Check if block end matches the latest block start token
+        # If true, remove it from the stack
+        if end_index and end_index != start_index:
+            try:
+                last_start_token = blocks.pop()
+            except IndexError:
+                return
+            if last_start_token != ignore_block.start:
+                blocks.append(last_start_token)
 
 
 def __get_active_rules(
@@ -77,6 +119,7 @@ def check_and_fix_file(filename, autofix=False):
         lines = file.readlines()
         _, extension = os.path.splitext(f"./{file.name}")
         comment_string = __get_comment_string(extension)
+        ignore_blocks = __get_ignore_blocks(extension)
 
     # Don't check empty files
     if len(lines) == 0:
@@ -94,21 +137,12 @@ def check_and_fix_file(filename, autofix=False):
     # Whole file ignored
     if file_rules == {}:
         return True
-    inside_codeblock = False
     for line_number, line in enumerate(lines, start=1):
         fixed_line = line
-
-        # Ignore text inside code blocks in Markdown
-        if extension == ".md":
-            if not inside_codeblock and line.lstrip().startswith("```"):
-                inside_codeblock = True
-            elif inside_codeblock and line.lstrip().startswith("```"):
-                inside_codeblock = False
-
-            if inside_codeblock:
-                fixed_lines.append(fixed_line)
-                continue
-
+        __check_block(ignore_blocks, line)
+        if blocks:
+            fixed_lines.append(fixed_line)
+            continue
         active_rules = file_rules
         if line_number != 1:
             line_rules, _ = __get_active_rules(
