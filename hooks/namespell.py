@@ -2,6 +2,7 @@ import argparse
 import os
 import re
 import sys
+import time
 from importlib import metadata
 from typing import NamedTuple, List
 from collections import deque
@@ -33,9 +34,18 @@ class IgnoreBlock(NamedTuple):
     start: str
     end: str
 
+class IgnoreInline(NamedTuple):
+    start: str
+    end: str
+
 IGNORE_BLOCKS = {
-".md": [IgnoreBlock("```", "```"), IgnoreBlock("<!--", "-->")],
-"default": []
+    ".md": [IgnoreBlock("```", "```"), IgnoreBlock("<!--", "-->")],
+    "default": []
+}
+
+IGNORE_INLINE = {
+    ".md": [IgnoreInline("`", "`"), IgnoreInline("<!--", "-->")],
+    "default": []
 }
 
 # Stack that keeps track of "active" blocks to be ignored by storing their
@@ -57,6 +67,14 @@ def __get_ignore_blocks(extension) -> List[IgnoreBlock]:
             IGNORE_BLOCKS[extension]
             if extension in IGNORE_BLOCKS.keys()
             else IGNORE_BLOCKS["default"]
+    )
+
+
+def __get_inline_ignore(extension) -> List[IgnoreInline]:
+    return (
+            IGNORE_INLINE[extension]
+            if extension in IGNORE_INLINE.keys()
+            else IGNORE_INLINE["default"]
     )
 
 
@@ -95,6 +113,36 @@ def __check_block(ignore_blocks, line, verbose=False):
                         current_start_token = blocks[-1]
                 except IndexError:
                     return
+
+# return list of indices of words to be ignored
+def __check_inline_ignore(ignore_inline, line, verbose=False):
+    indices = []
+    for element in ignore_inline:
+        start_index = line.find(element.start)
+        if start_index == -1:
+            continue
+        position = 0
+        line_to_process = line
+        while start_index != -1:
+            __log_verbose(f"INLINE BLOCK START: {position + start_index}", verbose)
+            position += start_index
+            line_to_process = line_to_process[start_index + 1:]
+            end_index = line_to_process.find(element.end) + 1
+            if end_index == -1:
+                print("Error: No matching inline comment/code ending tag")
+            __log_verbose(f"INLINE BLOCK END: {position + end_index}", verbose)
+            line_slice = line_to_process[:end_index - 1]
+            for name in NAME_RULES.keys():
+                pattern = re.compile(
+                    rf"(?<![-_\./=\"#]){re.escape(name)}(?![-_\./=\"#])", re.IGNORECASE
+                )
+                for m in re.finditer(pattern, line_slice):
+                    i = position + m.start() + 1
+                    indices.append(i)
+            position += end_index + 1
+            line_to_process = line_to_process[end_index:]
+            start_index = line_to_process.find(element.start)
+    return indices
 
 
 def __get_active_rules(
@@ -139,6 +187,7 @@ def check_and_fix_file(filename, autofix=False, verbose=False):
         _, extension = os.path.splitext(f"./{file.name}")
         comment_string = __get_comment_string(extension)
         ignore_blocks = __get_ignore_blocks(extension)
+        ignore_inline = __get_inline_ignore(extension)
         __log_verbose(f"FILE: {filename}", verbose)
     
     # Don't check empty files
@@ -161,6 +210,7 @@ def check_and_fix_file(filename, autofix=False, verbose=False):
         __log_verbose(f"LINE {line_number}", verbose)
         fixed_line = line
         __check_block(ignore_blocks, line, verbose)
+        to_ignore = __check_inline_ignore(ignore_inline, line, verbose)
         if blocks:
             fixed_lines.append(fixed_line)
             continue
@@ -180,12 +230,13 @@ def check_and_fix_file(filename, autofix=False, verbose=False):
             pattern = re.compile(
                 rf"(?<![-_\./=\"#]){re.escape(name)}(?![-_\./=\"#])", re.IGNORECASE
             )
-            matches = pattern.findall(line)
+            matches = re.finditer(pattern, line)
             for match in matches:
-                if match != correct_format:
+                __log_verbose(f"FOUND: {match.group()} AT {match.start()}", verbose)
+                if match.group() != correct_format and match.start() not in to_ignore:
                     found_issues = True
                     print(
-                        f"{filename}:{line_number}: '{match}' should be '{correct_format}'"
+                        f"{filename}:{line_number}: '{match.group()}' should be '{correct_format}'"
                     )
                 if autofix:
                     fixed_line = re.sub(pattern, correct_format, fixed_line)
