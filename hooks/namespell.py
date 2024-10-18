@@ -3,9 +3,9 @@ import os
 import re
 import sys
 import time
-from importlib import metadata
-from typing import NamedTuple, List
 from collections import deque
+from importlib import metadata
+from typing import List, NamedTuple
 
 NAME_RULES = {
     "Zarhus": "Zarhus",
@@ -30,29 +30,33 @@ COMMENT_STRINGS = {
 
 IGNORE_STRING = "namespell:disable"
 
+
 class IgnoreBlock(NamedTuple):
     start: str
     end: str
+
 
 class IgnoreInline(NamedTuple):
     start: str
     end: str
 
+
 IGNORE_BLOCKS = {
     ".md": [IgnoreBlock("```", "```"), IgnoreBlock("<!--", "-->")],
-    "default": []
+    "default": [],
 }
 
 IGNORE_INLINE = {
     ".md": [IgnoreInline("`", "`"), IgnoreInline("<!--", "-->")],
-    "default": []
+    "default": [],
 }
 
 # Stack that keeps track of "active" blocks to be ignored by storing their
-# start strings. This is necesary for nested blocks (e.g code block inside
+# start strings. This is necessary for nested blocks (e.g code block inside
 # comment)
 blocks = deque()
 current_start_token = ""
+
 
 def __get_comment_string(extension) -> str:
     return (
@@ -64,17 +68,17 @@ def __get_comment_string(extension) -> str:
 
 def __get_ignore_blocks(extension) -> List[IgnoreBlock]:
     return (
-            IGNORE_BLOCKS[extension]
-            if extension in IGNORE_BLOCKS.keys()
-            else IGNORE_BLOCKS["default"]
+        IGNORE_BLOCKS[extension]
+        if extension in IGNORE_BLOCKS.keys()
+        else IGNORE_BLOCKS["default"]
     )
 
 
 def __get_inline_ignore(extension) -> List[IgnoreInline]:
     return (
-            IGNORE_INLINE[extension]
-            if extension in IGNORE_INLINE.keys()
-            else IGNORE_INLINE["default"]
+        IGNORE_INLINE[extension]
+        if extension in IGNORE_INLINE.keys()
+        else IGNORE_INLINE["default"]
     )
 
 
@@ -93,11 +97,15 @@ def __check_block(ignore_blocks, line, verbose=False):
         if start_index != -1:
             # For identical start and end tokens: If the last start token was
             # the same as this one, then this one is an end token
-            if ignore_block.start == ignore_block.end \
-                and current_start_token == ignore_block.start:
+            if (
+                ignore_block.start == ignore_block.end
+                and current_start_token == ignore_block.start
+            ):
                 start_index = -1
             else:
-                __log_verbose(f"BLOCK START: {ignore_block.start}, INDEX: {start_index}", verbose)
+                __log_verbose(
+                    f"BLOCK START: {ignore_block.start}, INDEX: {start_index}", verbose
+                )
                 blocks.append(ignore_block.start)
                 current_start_token = ignore_block.start
         # Check if block end matches the latest block start token
@@ -114,6 +122,7 @@ def __check_block(ignore_blocks, line, verbose=False):
                 except IndexError:
                     return
 
+
 # return list of indices of words to be ignored
 def __check_inline_ignore(ignore_inline, line, verbose=False):
     indices = []
@@ -126,12 +135,12 @@ def __check_inline_ignore(ignore_inline, line, verbose=False):
         while start_index != -1:
             __log_verbose(f"INLINE BLOCK START: {position + start_index}", verbose)
             position += start_index
-            line_to_process = line_to_process[start_index + 1:]
+            line_to_process = line_to_process[start_index + 1 :]
             end_index = line_to_process.find(element.end) + 1
             if end_index == -1:
                 print("Error: No matching inline comment/code ending tag")
             __log_verbose(f"INLINE BLOCK END: {position + end_index}", verbose)
-            line_slice = line_to_process[:end_index - 1]
+            line_slice = line_to_process[: end_index - 1]
             for name in NAME_RULES.keys():
                 pattern = re.compile(
                     rf"(?<![-_\./=\"#]){re.escape(name)}(?![-_\./=\"#])", re.IGNORECASE
@@ -189,7 +198,7 @@ def check_and_fix_file(filename, autofix=False, verbose=False):
         ignore_blocks = __get_ignore_blocks(extension)
         ignore_inline = __get_inline_ignore(extension)
         __log_verbose(f"FILE: {filename}", verbose)
-    
+
     # Don't check empty files
     if len(lines) == 0:
         return True
@@ -267,10 +276,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("files", nargs="+", help="File(s) to parse")
     parser.add_argument(
-            "--verbose",
-            action="store_true",
-            default=False,
-            help="Run tool in verbose mode"
+        "--verbose", action="store_true", default=False, help="Run tool in verbose mode"
     )
     return parser.parse_args()
 
