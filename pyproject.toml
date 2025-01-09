@@ -11,3 +11,4 @@ version = "0.1.0"
 
 [project.scripts]
 namespell = "hooks.namespell:main"
+sort-mkdocs = "hooks.sort_mkdocs:main"

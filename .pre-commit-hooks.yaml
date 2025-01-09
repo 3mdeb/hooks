@@ -3,3 +3,9 @@
   description: Check name spelling (case-sensitive)
   entry: namespell
   language: python
+
+- id: sort-mkdocs
+  name: Sorts mkdocs.yml file
+  description: Sorts mkdocs.yml file
+  entry: sort-mkdocs
+  language: python
