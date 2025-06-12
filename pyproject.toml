@@ -7,8 +7,9 @@ name = "3mdeb-hooks"
 authors = [{name = "3mdeb"}]
 description = "3mdeb pre-commit hooks"
 license = { text = "MIT" }
-version = "0.1.0"
+version = "0.1.6"
 
 [project.scripts]
 namespell = "hooks.namespell:main"
 sort-mkdocs = "hooks.sort_mkdocs:main"
+check-upstream-status = "hooks.check_upstream_status:main"

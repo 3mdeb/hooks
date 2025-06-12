@@ -104,3 +104,8 @@ somefile:5: 'Coreboot' should be 'coreboot'
 
 As you can see, the spelling of `Zarhus` is ignored throughout the whole file
 and the spelling of `Dasharo` is only ignored in line 4.
+
+### check-upstream-status
+
+The goal is to enforce
+[these rules](https://docs.dasharo.com/dev-proc/source-code-structure/#commit-message-guidelines).

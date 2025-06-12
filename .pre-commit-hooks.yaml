@@ -9,3 +9,12 @@
   description: Sorts mkdocs.yml file
   entry: sort-mkdocs
   language: python
+
+- id: check-upstream-status
+  name: Upstream-Status checker
+  description: Check Upstream-Status tag in a commit message
+  entry: check-upstream-status
+  language: python
+  stages: [commit-msg]
+  always_run: true
+  pass_filenames: false
