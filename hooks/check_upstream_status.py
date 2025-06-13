@@ -50,6 +50,8 @@ def has_valid_upstream_status(commit_hash, debug=False):
         if debug:
             print(f"\n[DEBUG] Commit: {commit_hash}\n{message.strip()}\n{'-' * 40}")
         for line in message.splitlines():
+            if debug:
+                print(f"[DEBUG] Checking line: {repr(line.strip())}")
             for pattern in UPSTREAM_STATUS_PATTERNS:
                 if re.match(pattern, line.strip()):
                     return True
@@ -84,7 +86,17 @@ def main():
             "\n❌ The following commits are missing or have invalid 'Upstream-Status':\n"
         )
         for fc in failed_commits:
-            print(f"  - {fc}")
+            try:
+                title = (
+                    subprocess.check_output(
+                        ["git", "log", "-n", "1", "--format=%s", fc]
+                    )
+                    .decode()
+                    .strip()
+                )
+            except subprocess.CalledProcessError:
+                title = "(unable to retrieve title)"
+            print(f"  - {fc}: {title}")
         print("\nExpected format examples:")
         print("  Upstream-Status: Backport [CB:86758]")
         print("  Upstream-Status: Inappropriate [Dasharo downstream]")
