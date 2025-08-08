@@ -21,7 +21,7 @@
 
 - id: replace-hyphen-like
   name: Replace hyphen-like characters with HYPHEN-MINUS in markdown
-  entry: python3 replace_em_dash.py
+  entry: replace-hyphen-like
   language: system
   files: \.(md|markdown)$
   types: [text]
