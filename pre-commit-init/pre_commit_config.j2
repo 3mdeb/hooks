@@ -42,10 +42,11 @@ repos:
         args: [-c=.yamllint]
 
   - repo: https://github.com/3mdeb/hooks
-    rev: v0.1.1
+    rev: v0.1.8
     hooks:
       - id: namespell
         args: [--fix]
+      - id: replace-hyphen-like
 
 {% if 'markdown' in categories %}
   - repo: https://github.com/igorshubovych/markdownlint-cli
