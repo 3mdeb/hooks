@@ -4,11 +4,11 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "3mdeb-hooks"
-packages = [{include = "src/hooks"}]
+packages = [{include = "hooks", from = "src"}]
 authors = ["3mdeb"]
 description = "3mdeb pre-commit hooks"
 license = "MIT"
-version = "0.2.0"
+version = "0.2.1"
 
 [tool.poetry.scripts]
 namespell = "hooks.namespell:main"
