@@ -22,7 +22,7 @@
 - id: replace-hyphen-like
   name: Replace hyphen-like characters with HYPHEN-MINUS in markdown
   entry: replace-hyphen-like
-  language: system
+  language: python
   files: \.(md|markdown)$
   types: [text]
   pass_filenames: true
