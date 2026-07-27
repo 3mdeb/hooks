@@ -37,8 +37,13 @@ def main(repo_path, categories):
         lstrip_blocks=True,
     )
     template = env.get_template("pre_commit_config.j2")
+    # The template separates category blocks with blank lines, so the render
+    # ends with however many the last enabled block left behind. Collapse them
+    # to a single trailing newline so end-of-file-fixer passes on the generated
+    # config.
+    rendered = template.render(categories=categories).rstrip() + "\n"
     with open(".pre-commit-config.yaml", "w") as f:
-        f.write(template.render(categories=categories))
+        f.write(rendered)
 
     # Install additional configuration files based on the selected categories
     copy2(os.path.join(script_dir, ".yamllint"), repo_path)
