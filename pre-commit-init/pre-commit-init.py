@@ -3,6 +3,7 @@
 import os
 import subprocess
 import sys
+from pathlib import Path
 from shutil import copy2
 
 from jinja2 import Environment, FileSystemLoader
@@ -12,6 +13,7 @@ valid_categories = {"markdown", "bash", "python", "robotframework", "yocto"}
 
 
 def main(repo_path, categories):
+    repo_path = Path(repo_path).resolve()
     # Navigate to the repository path
     os.chdir(repo_path)
 
