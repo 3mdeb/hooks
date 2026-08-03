@@ -3,7 +3,7 @@
 ## Goal
 
 The goal of this repository is to provide a common place for (pre-commit) hooks
-used to verify the quality of deliverables (such as docuemntation) produced by
+used to verify the quality of deliverables (such as documentation) produced by
 3mdeb.
 
 ## Usage
